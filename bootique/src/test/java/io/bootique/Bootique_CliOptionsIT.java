@@ -54,20 +54,14 @@ public class Bootique_CliOptionsIT {
     }
 
     @Test
-    public void helpOption() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("--help"));
-        assertTrue(runtime.getInstance(Cli.class).hasOption("help"));
-    }
-
-    @Test
-    public void helpOption_Short() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-h"));
-        assertTrue(runtime.getInstance(Cli.class).hasOption("help"));
+    public void helpCommand() {
+        BQRuntime runtime = appManager.runtime(Bootique.app("help"));
+        assertTrue(runtime.run().isSuccess());
     }
 
     @Test
     public void noHelpOption() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("a", "b"));
+        BQRuntime runtime = appManager.runtime(Bootique.app());
         assertFalse(runtime.getInstance(Cli.class).hasOption("help"));
     }
 
@@ -102,13 +96,35 @@ public class Bootique_CliOptionsIT {
     }
 
     @Test
+    public void sharedCommandSubOption_FirstCommand() {
+        BQRuntime runtime = appManager.runtime(Bootique.app("cmd1", "--foo")
+                .module(b -> BQCoreModule.extend(b)
+                        .addCommand(new CommandWithSharedOpt("cmd1", "foo"))
+                        .addCommand(new CommandWithSharedOpt("cmd2", "foo"))));
+        Cli cli = runtime.getInstance(Cli.class);
+        assertEquals("cmd1", cli.commandName());
+        assertTrue(cli.hasOption("foo"));
+    }
+
+    @Test
+    public void sharedCommandSubOption_SecondCommand() {
+        BQRuntime runtime = appManager.runtime(Bootique.app("cmd2", "--foo")
+                .module(b -> BQCoreModule.extend(b)
+                        .addCommand(new CommandWithSharedOpt("cmd1", "foo"))
+                        .addCommand(new CommandWithSharedOpt("cmd2", "foo"))));
+        Cli cli = runtime.getInstance(Cli.class);
+        assertEquals("cmd2", cli.commandName());
+        assertTrue(cli.hasOption("foo"));
+    }
+
+    @Test
     public void overlappingOptions_Short() {
         BQRuntime runtime = appManager.runtime(Bootique.app("-o")
                 .module(b -> BQCoreModule.extend(b).addOptions(
                         OptionMetadata.builder("o1").build(),
                         OptionMetadata.builder("o2").build()
                 )));
-        assertThrows(DIRuntimeException.class, () -> runtime.run());
+        assertThrows(DIRuntimeException.class, runtime::run);
     }
 
     @Test
@@ -118,67 +134,51 @@ public class Bootique_CliOptionsIT {
                         OptionMetadata.builder("o1").build(),
                         OptionMetadata.builder("o2").build()
                 )));
-        
+
         assertTrue(runtime.run().isSuccess());
     }
 
     @Test
     public void commandWithOptionNameOverlap() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-x")
+        BQRuntime runtime = appManager.runtime(Bootique.app("xd")
                 .module(b -> BQCoreModule.extend(b)
                         .addCommand(new NamedCommand("xd"))
                         .addOption(OptionMetadata.builder("xd").build())
                 ));
 
-        assertThrows(DIRuntimeException.class, () -> runtime.run());
+        assertTrue(runtime.run().isSuccess());
     }
 
     @Test
     public void command_IllegalShort() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-x")
+        BQRuntime runtime = appManager.runtime(Bootique.app("x")
                 .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class)));
-        assertThrows(DIRuntimeException.class, () -> runtime.run());
-    }
-
-    @Test
-    public void command_ExplicitShort() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-A")
-                .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class)));
-        assertTrue(runtime.getInstance(Cli.class).hasOption("xa"));
+        assertThrows(BootiqueException.class, runtime::run);
     }
 
     @Test
     public void overlappingCommands_IllegalShort() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-x")
+        BQRuntime runtime = appManager.runtime(Bootique.app("x")
                 .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class).addCommand(XbCommand.class)));
-        assertThrows(DIRuntimeException.class, () -> runtime.run());
+        assertThrows(BootiqueException.class, runtime::run);
     }
 
     @Test
     public void illegalAbbreviation() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("--xc")
+        BQRuntime runtime = appManager.runtime(Bootique.app("xc")
                 .module(b -> BQCoreModule.extend(b).addCommand(XccCommand.class)));
-        assertThrows(DIRuntimeException.class, () -> runtime.run());
-    }
-
-    @Test
-    public void overlappingCommands_Short() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-A")
-                .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class).addCommand(XbCommand.class)));
-
-        assertTrue(runtime.getInstance(Cli.class).hasOption("xa"));
-        assertFalse(runtime.getInstance(Cli.class).hasOption("xb"));
+        assertThrows(BootiqueException.class, runtime::run);
     }
 
     @Test
     public void defaultCommandOptions() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-l", "x", "--long=y", "-s")
+        BQRuntime runtime = appManager.runtime(Bootique.app("-l", "x", "--long=y")
                 .module(b -> BQCoreModule.extend(b).setDefaultCommand(TestCommand.class)));
 
 
         Cli cli = runtime.getInstance(Cli.class);
 
-        assertTrue(cli.hasOption("s"));
+        assertFalse(cli.hasOption("s"));
         assertEquals("x_y", String.join("_", cli.optionStrings("long")));
     }
 
@@ -219,7 +219,7 @@ public class Bootique_CliOptionsIT {
                         .mapConfigPath("opt-1", "c.m.k")
                         .addCommand(new TestOptionCommand1())));
 
-        assertThrows(DIRuntimeException.class, () -> runtime.run());
+        assertThrows(DIRuntimeException.class, runtime::run);
     }
 
     @Test
@@ -318,7 +318,7 @@ public class Bootique_CliOptionsIT {
 
     @Test
     public void commandWithOptionWithDefaultValue() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-cmd", "--option")
+        BQRuntime runtime = appManager.runtime(Bootique.app("cmd", "--option")
                 .module(b -> BQCoreModule.extend(b).addCommand(CommandWithDefaultOptionValue.class)));
 
         Cli cli = runtime.getInstance(Cli.class);
@@ -326,41 +326,23 @@ public class Bootique_CliOptionsIT {
         assertEquals("val", cli.optionString("o"));
     }
 
-    @Test
-    public void commandRequiredValue() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-B=bVal")
-                .module(b -> BQCoreModule.extend(b)
-                        .addCommand(CommandBWithRequiredValue.class)
-                ));
-        Cli cli = runtime.getInstance(Cli.class);
-        assertEquals("commandRequiredValue", cli.commandName());
-        assertEquals("bVal", cli.optionString("B"));
-    }
-
-    @Test
-    public void commandDefaultValue() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-A")
-                .module(b -> BQCoreModule.extend(b)
-                        .addCommand(CommandAWithDefaultValue.class)
-                ));
-        Cli cli = runtime.getInstance(Cli.class);
-        assertEquals("commandDefaultValue", cli.commandName());
-        assertEquals("commandVal", cli.optionString("A"));
-    }
-
-    @Test
-    void missingCommandDefaultValue() {
-        BQRuntime runtime = appManager.runtime(Bootique.app()
-                .module(b -> BQCoreModule.extend(b)
-                        .addCommand(CommandAWithDefaultValue.class)
-                ));
-        Cli cli = runtime.getInstance(Cli.class);
-        assertNotEquals("command", cli.commandName());
-        assertNull(cli.optionString("option"));
-    }
-
     private void assertCollectionsEquals(Collection<String> result, String... expected) {
         assertArrayEquals(expected, result.toArray());
+    }
+
+    static final class CommandWithSharedOpt extends CommandWithMetadata {
+
+        public CommandWithSharedOpt(String commandName, String optionName) {
+            super(CommandMetadata.builder(CommandWithSharedOpt.class)
+                    .name(commandName)
+                    .addOption(OptionMetadata.builder(optionName).build())
+                    .build());
+        }
+
+        @Override
+        public CommandOutcome run(Cli cli) {
+            return null;
+        }
     }
 
     static final class NamedCommand extends CommandWithMetadata {
@@ -393,7 +375,7 @@ public class Bootique_CliOptionsIT {
     static final class XaCommand extends CommandWithMetadata {
 
         public XaCommand() {
-            super(CommandMetadata.builder(XaCommand.class).shortName('A').build());
+            super(CommandMetadata.builder(XaCommand.class).build());
         }
 
         @Override
@@ -405,7 +387,7 @@ public class Bootique_CliOptionsIT {
     static final class XbCommand extends CommandWithMetadata {
 
         public XbCommand() {
-            super(CommandMetadata.builder(XbCommand.class).shortName('B').build());
+            super(CommandMetadata.builder(XbCommand.class).build());
         }
 
         @Override
@@ -417,7 +399,7 @@ public class Bootique_CliOptionsIT {
     static final class XccCommand extends CommandWithMetadata {
 
         public XccCommand() {
-            super(CommandMetadata.builder(XccCommand.class).shortName('B').build());
+            super(CommandMetadata.builder(XccCommand.class).build());
         }
 
         @Override
@@ -469,36 +451,6 @@ public class Bootique_CliOptionsIT {
         public CommandWithDefaultOptionValue() {
             super(CommandMetadata.builder("cmd")
                     .addOption(OptionMetadata.builder("option").valueOptionalWithDefault("val").build()).build());
-        }
-
-        @Override
-        public CommandOutcome run(Cli cli) {
-            return CommandOutcome.succeeded();
-        }
-    }
-
-    static final class CommandAWithDefaultValue extends CommandWithMetadata {
-        public CommandAWithDefaultValue() {
-            super(CommandMetadata.builder("commandDefaultValue")
-                    .valueOptionalWithDefault("commandVal")
-                    .shortName('A')
-                    .build()
-            );
-        }
-
-        @Override
-        public CommandOutcome run(Cli cli) {
-            return CommandOutcome.succeeded();
-        }
-    }
-
-    static final class CommandBWithRequiredValue extends CommandWithMetadata {
-        public CommandBWithRequiredValue() {
-            super(CommandMetadata.builder("commandRequiredValue")
-                    .valueRequired("commandVal")
-                    .shortName('B')
-                    .build()
-            );
         }
 
         @Override

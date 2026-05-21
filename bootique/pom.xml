@@ -36,18 +36,8 @@
 		of any kind. Be it webservices, webapps, jobs, etc. 
 	</description>
 
-	<properties>
-		<jopt.version>5.0.3</jopt.version>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>net.sf.jopt-simple</groupId>
-				<artifactId>jopt-simple</artifactId>
-				<version>${jopt.version}</version>
-			</dependency>
-
 			<!-- Jetty is used in tests to emulate a webserver -->
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -95,10 +85,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jopt-simple</groupId>
-			<artifactId>jopt-simple</artifactId>
 		</dependency>
 
 		<!-- Unit test dependencies -->

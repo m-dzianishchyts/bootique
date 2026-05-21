@@ -40,8 +40,6 @@ public class HelpConfigCommand extends CommandWithMetadata {
                 .builder(HelpConfigCommand.class)
                 .description("Prints information about application modules and their configuration options. "
                         + "Optionally, you can provide a 'prefix' argument to print only the specified config.")
-                .valueOptional("prefix")
-                .shortName('H')
                 .build());
 
         this.bootLogger = bootLogger;

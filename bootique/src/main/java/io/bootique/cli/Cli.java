@@ -19,8 +19,6 @@
 
 package io.bootique.cli;
 
-import joptsimple.OptionSpec;
-
 import java.util.List;
 
 /**
@@ -37,7 +35,7 @@ public interface Cli {
 
     boolean hasOption(String name);
 
-    List<OptionSpec<?>> detectedOptions();
+    List<String> detectedOptions();
 
     /**
      * Returns a List of String values for the specified option name.

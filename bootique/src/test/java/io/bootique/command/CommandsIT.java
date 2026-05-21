@@ -26,6 +26,7 @@ import io.bootique.Bootique;
 import io.bootique.cli.Cli;
 import io.bootique.config.jackson.CliConfigurationLoader;
 import io.bootique.di.Binder;
+import io.bootique.BootiqueException;
 import io.bootique.di.DIRuntimeException;
 import io.bootique.help.HelpCommand;
 import io.bootique.meta.application.ApplicationMetadata;
@@ -38,7 +39,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -103,7 +103,7 @@ public class CommandsIT {
                 .getOptions().stream()
                 .map(OptionMetadata::getName)
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
 
         assertEquals(List.of("config"), topOptions);
 
@@ -111,7 +111,7 @@ public class CommandsIT {
                 .getCommands().stream()
                 .map(CommandMetadata::getName)
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(List.of(), commands);
 
         List<String> commandOptions = appMd
@@ -119,7 +119,7 @@ public class CommandsIT {
                 .flatMap(c -> c.getOptions().stream())
                 .map(OptionMetadata::getName)
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(List.of(), commandOptions);
     }
 
@@ -134,7 +134,7 @@ public class CommandsIT {
                 .getOptions().stream()
                 .map(OptionMetadata::getName)
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
 
         assertEquals(List.of(), topOptions);
     }
@@ -143,7 +143,7 @@ public class CommandsIT {
     public void noModuleOptions_TryExec() {
         BQModule commandsModule = Commands.builder().noModuleOptions().module();
         BQRuntime tryConfig = appManager.runtime(Bootique.app("--config=classpath:io/bootique/test1.yml").module(commandsModule));
-        assertThrows(DIRuntimeException.class, () -> tryConfig.run());
+        assertThrows(DIRuntimeException.class, tryConfig::run);
     }
 
     @Test
@@ -164,11 +164,11 @@ public class CommandsIT {
     public void noModuleCommands_TryExec() {
         BQModule commandsModule = Commands.builder().noModuleCommands().module();
 
-        BQRuntime tryHelp = appManager.runtime(Bootique.app("--help").module(commandsModule));
-        assertThrows(DIRuntimeException.class, () -> tryHelp.run());
+        BQRuntime tryHelp = appManager.runtime(Bootique.app("help").module(commandsModule));
+        assertThrows(BootiqueException.class, tryHelp::run);
 
-        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("--help-config").module(commandsModule));
-        assertThrows(DIRuntimeException.class, () -> tryHelpConfig.run());
+        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("help-config").module(commandsModule));
+        assertThrows(BootiqueException.class, tryHelpConfig::run);
     }
 
     @Test
@@ -177,12 +177,12 @@ public class CommandsIT {
                 .add(HelpCommand.class)
                 .module();
 
-        BQRuntime tryHelp = appManager.runtime(Bootique.app("--help").module(commandsModule));
+        BQRuntime tryHelp = appManager.runtime(Bootique.app("help").module(commandsModule));
         CommandOutcome helpOutcome = tryHelp.run();
         assertTrue(helpOutcome.isSuccess());
 
-        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("--help-config").module(commandsModule));
-        assertThrows(DIRuntimeException.class, () -> tryHelpConfig.run());
+        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("help-config").module(commandsModule));
+        assertThrows(BootiqueException.class, tryHelpConfig::run);
     }
 
     @Test

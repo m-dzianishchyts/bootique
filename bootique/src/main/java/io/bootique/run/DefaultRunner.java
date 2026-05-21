@@ -19,12 +19,15 @@
 
 package io.bootique.run;
 
+import io.bootique.BootiqueException;
 import io.bootique.cli.Cli;
 import io.bootique.command.Command;
 import io.bootique.command.CommandManager;
 import io.bootique.command.CommandOutcome;
 import io.bootique.command.ExecutionPlanBuilder;
 import io.bootique.command.ManagedCommand;
+
+import java.util.List;
 
 public class DefaultRunner implements Runner {
 
@@ -61,7 +64,11 @@ public class DefaultRunner implements Runner {
             return explicitCommand.getCommand();
         }
 
-        // command not found in CLI .. go through defaults
+        // command not found in CLI .. validate unknown positional args
+        List<String> args = cli.standaloneArguments();
+        if (!args.isEmpty()) {
+            throw new BootiqueException(1, "Unknown command: '" + args.get(0) + "'");
+        }
 
         return commandManager.getPublicDefaultCommand() // 1. runtime default command
                 .orElse(commandManager.getPublicHelpCommand() // 2. help command

@@ -29,7 +29,6 @@ import io.bootique.command.ManagedCommand;
 import io.bootique.log.DefaultBootLogger;
 import io.bootique.meta.application.CommandMetadata;
 import io.bootique.meta.application.OptionMetadata;
-import joptsimple.OptionSpec;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -223,7 +222,7 @@ public class DefaultRunnerTest {
             }
 
             @Override
-            public List<OptionSpec<?>> detectedOptions() {
+            public List<String> detectedOptions() {
                 return List.of();
             }
 

@@ -141,8 +141,12 @@ class MultiCommand extends CommandWithMetadata {
 
         // wrap both command resolving and execution in try/catch... Both can have errors...
         try {
-            Cli cli = getCliFactory().createCli(cmdRef.getArgs());
             Command command = cmdRef.resolve(commandManager);
+            String[] args = cmdRef.getArgs();
+            if (args.length > 0) {
+                args = prepend(command.getMetadata().getName(), args);
+            }
+            Cli cli = getCliFactory().createCli(args);
             outcome = command.run(cli);
         }
         // TODO: we need to distinguish between interrupts and other errors and re-throw interrupts
@@ -179,6 +183,13 @@ class MultiCommand extends CommandWithMetadata {
                 logger.stderr(String.format("Error running command"), outcome.getException());
             }
         }
+    }
+
+    private static String[] prepend(String element, String[] array) {
+        String[] result = new String[array.length + 1];
+        result[0] = element;
+        System.arraycopy(array, 0, result, 1, array.length);
+        return result;
     }
 
     private CliFactory getCliFactory() {

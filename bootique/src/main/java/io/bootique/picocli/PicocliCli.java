@@ -17,44 +17,46 @@
  * under the License.
  */
 
-package io.bootique.cli;
+package io.bootique.picocli;
 
-import java.util.Collections;
+import io.bootique.cli.Cli;
+
 import java.util.List;
 
 /**
- * A Cli instance over an empty argument list.
+ * Cli implementation using picocli parsing results.
+ * No picocli types are exposed in the public interface.
  */
-public final class NoArgsCli implements Cli {
+public class PicocliCli implements Cli {
 
-    private static final Cli INSTANCE = new NoArgsCli();
+    private final PicocliParseResult parseResult;
 
-    public static Cli getInstance() {
-        return INSTANCE;
+    public PicocliCli(PicocliParseResult parseResult) {
+        this.parseResult = parseResult;
     }
 
     @Override
     public String commandName() {
-        return null;
+        return parseResult.getCommandName();
     }
 
     @Override
-    public boolean hasOption(String name) {
-        return false;
+    public boolean hasOption(String optionName) {
+        return parseResult.hasOption(optionName);
+    }
+
+    @Override
+    public List<String> optionStrings(String optionName) {
+        return parseResult.getOptionStrings(optionName);
     }
 
     @Override
     public List<String> detectedOptions() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<String> optionStrings(String name) {
-        return Collections.emptyList();
+        return parseResult.getDetectedOptions();
     }
 
     @Override
     public List<String> standaloneArguments() {
-        return Collections.emptyList();
+        return parseResult.getStandaloneArguments();
     }
 }

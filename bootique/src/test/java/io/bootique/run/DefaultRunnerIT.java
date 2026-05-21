@@ -41,6 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultRunnerIT {
 
+    public static final String LINE_SEPARATOR = System.lineSeparator();
+
     private ByteArrayOutputStream out;
 
     @BeforeEach
@@ -51,7 +53,7 @@ public class DefaultRunnerIT {
     @Test
     public void run_Explicit() {
 
-        Bootique.app("-x")
+        Bootique.app("x")
                 .module(b -> BQCoreModule.extend(b).addCommand(XCommand.class))
                 .bootLogger(new DefaultBootLogger(true, new PrintStream(out), System.err))
                 .createRuntime()
@@ -83,8 +85,8 @@ public class DefaultRunnerIT {
 
         String help = out.toString();
 
-        assertTrue(help.contains("-h, --help"));
-        assertTrue(help.contains("-x"));
+        assertTrue(help.contains("      help" + LINE_SEPARATOR));
+        assertTrue(help.contains("      x" + LINE_SEPARATOR));
         assertFalse(help.contains("x_was_run"));
     }
 
@@ -113,9 +115,9 @@ public class DefaultRunnerIT {
 
         String help = out.toString();
 
-        assertTrue(help.contains("-h, --help"));
-        assertFalse(help.contains("-x"));
-        assertTrue(help.contains("-y"));
+        assertTrue(help.contains("      help" + LINE_SEPARATOR));
+        assertFalse(help.contains("      x" + LINE_SEPARATOR));
+        assertTrue(help.contains("      y" + LINE_SEPARATOR));
 
         assertFalse(help.contains("x_was_run"));
         assertFalse(help.contains("y_was_run"));

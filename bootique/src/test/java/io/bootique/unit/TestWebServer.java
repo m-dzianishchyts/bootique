@@ -48,7 +48,7 @@ public class TestWebServer implements BeforeAllCallback, AfterAllCallback {
     private final BQRuntime webServer;
 
     public TestWebServer(String resourceBase) {
-        this.webServer = Bootique.app("--server")
+        this.webServer = Bootique.app("server")
                 .module(new WebServerModule(resourceBase))
                 .createRuntime();
     }

@@ -49,7 +49,6 @@ import io.bootique.help.config.DefaultConfigHelpGenerator;
 import io.bootique.help.config.HelpConfigCommand;
 import io.bootique.jackson.DefaultJacksonService;
 import io.bootique.jackson.JacksonService;
-import io.bootique.jopt.JoptCliFactory;
 import io.bootique.log.BootLogger;
 import io.bootique.meta.application.ApplicationMetadata;
 import io.bootique.meta.application.ApplicationMetadataFactory;
@@ -58,6 +57,7 @@ import io.bootique.meta.config.ConfigHierarchyResolver;
 import io.bootique.meta.config.ConfigMetadataCompiler;
 import io.bootique.meta.module.ModulesMetadata;
 import io.bootique.meta.module.ModulesMetadataCompiler;
+import io.bootique.picocli.PicocliCliFactory;
 import io.bootique.run.DefaultRunner;
 import io.bootique.run.Runner;
 import io.bootique.shutdown.ShutdownManager;
@@ -230,10 +230,8 @@ public class BQCoreModule implements BQModule {
 
     @Provides
     @Singleton
-    CliFactory provideCliFactory(
-            Provider<CommandManager> commandManagerProvider,
-            ApplicationMetadata applicationMetadata) {
-        return new JoptCliFactory(commandManagerProvider, applicationMetadata);
+    CliFactory provideCliFactory(ApplicationMetadata applicationMetadata) {
+        return new PicocliCliFactory(applicationMetadata);
     }
 
     @Provides

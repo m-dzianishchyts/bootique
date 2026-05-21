@@ -47,13 +47,13 @@ public class BootiqueIT {
 
     @Test
     public void exec() {
-        CommandOutcome outcome = Bootique.app(args).exec();
+        CommandOutcome outcome = Bootique.app().exec();
         assertTrue(outcome.isSuccess());
     }
 
     @Test
     public void exec_Failure() {
-        CommandOutcome outcome = Bootique.app("-a").module(b ->
+        CommandOutcome outcome = Bootique.app("acommand").module(b ->
                 BQCoreModule.extend(b).addCommand(new Command() {
                     @Override
                     public CommandOutcome run(Cli cli) {
@@ -74,7 +74,7 @@ public class BootiqueIT {
 
     @Test
     public void exec_Exception() {
-        CommandOutcome outcome = Bootique.app("-a").module(b ->
+        CommandOutcome outcome = Bootique.app("acommand").module(b ->
                 BQCoreModule.extend(b).addCommand(new Command() {
                     @Override
                     public CommandOutcome run(Cli cli) {
@@ -99,22 +99,22 @@ public class BootiqueIT {
         List<BQModule> autoLoaded = Bootique.app(args).autoLoadedModules();
 
         assertEquals(1, autoLoaded.size());
-        autoLoaded.forEach(m -> assertTrue(m instanceof ItestModule2));
+        autoLoaded.forEach(m -> assertInstanceOf(ItestModule2.class, m));
     }
 
     @Test
     public void createInjector() {
         Injector i = Bootique.app(args).createInjector(shutdownManager, logger);
 
-        String[] args = i.getInstance(Key.get(String[].class, Args.class));
-        assertSame(this.args, args);
+        String[] actualArgs = i.getInstance(Key.get(String[].class, Args.class));
+        assertSame(args, actualArgs);
     }
 
     @Test
     public void app_Collection() {
         Injector i = Bootique.app(asList(args)).createInjector(shutdownManager, logger);
 
-        String[] args = i.getInstance(Key.get(String[].class, Args.class));
-        assertArrayEquals(this.args, args);
+        String[] actualArgs = i.getInstance(Key.get(String[].class, Args.class));
+        assertArrayEquals(args, actualArgs);
     }
 }

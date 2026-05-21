@@ -20,6 +20,7 @@
 package io.bootique.help;
 
 import io.bootique.meta.application.ApplicationMetadata;
+import io.bootique.meta.application.CommandMetadata;
 import io.bootique.meta.application.OptionMetadata;
 import io.bootique.meta.config.ConfigValueMetadata;
 
@@ -54,8 +55,26 @@ public class DefaultHelpGenerator implements HelpGenerator {
         HelpAppender appender = createAppender(out);
 
         printName(appender, application.getName(), application.getDescription());
-        printOptions(appender, application.getCliOptions());
+        printOptions(appender, application.getOptions());
+        printCommands(appender, application.getCommands());
         printEnvironment(appender, application.getVariables());
+    }
+
+    protected void printCommands(HelpAppender out, Collection<CommandMetadata> commands) {
+        if (commands.isEmpty()) {
+            return;
+        }
+
+        out.printSectionName("COMMANDS");
+
+        for (CommandMetadata cmd : commands) {
+            if (!cmd.isHidden()) {
+                out.printSubsectionHeader(cmd.getName());
+                if (cmd.getDescription() != null) {
+                    out.printDescription(cmd.getDescription());
+                }
+            }
+        }
     }
 
     protected void printName(HelpAppender out, String name, String description) {

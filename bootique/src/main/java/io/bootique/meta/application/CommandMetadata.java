@@ -28,21 +28,13 @@ import java.util.Collection;
 
 public class CommandMetadata implements MetadataNode {
 
+    private String name;
+    private String description;
     private boolean hidden;
     private final Collection<OptionMetadata> options;
-    private OptionMetadata commandOption;
 
     public CommandMetadata() {
         this.options = new ArrayList<>();
-    }
-
-    /**
-     * Returns {@link OptionMetadata} for this command CLI flag.
-     *
-     * @since 3.0
-     */
-    public OptionMetadata getCommandOption() {
-        return commandOption;
     }
 
     /**
@@ -75,17 +67,16 @@ public class CommandMetadata implements MetadataNode {
 
     @Override
     public String getName() {
-        return commandOption.getName();
+        return name;
     }
 
     @Override
     public String getDescription() {
-        return commandOption.getDescription();
+        return description;
     }
 
     /**
-     * Returns extra options recognized this command. The main option that activates the command is not included in
-     * this collection and is accessible via {@link #getCommandOption()}.
+     * Returns extra options recognized this command.
      */
     public Collection<OptionMetadata> getOptions() {
         return options;
@@ -112,92 +103,27 @@ public class CommandMetadata implements MetadataNode {
                 .build();
 
         private final CommandMetadata metadata;
-        private final OptionMetadata.Builder optionBuilder;
 
         private Builder() {
             this.metadata = new CommandMetadata();
-            this.optionBuilder = OptionMetadata.builder();
         }
 
         public CommandMetadata build() {
-            metadata.commandOption = optionBuilder.build();
             return metadata;
         }
 
         public Builder commandType(Class<? extends Command> commandType) {
-            optionBuilder.name(NAME_BUILDER.toName(commandType));
+            metadata.name = NAME_BUILDER.toName(commandType);
             return this;
         }
 
         public Builder name(String name) {
-            optionBuilder.name(name);
-            return this;
-        }
-
-        public Builder shortName(char shortName) {
-            optionBuilder.shortName(shortName);
+            metadata.name = name;
             return this;
         }
 
         public Builder description(String description) {
-            optionBuilder.description(description);
-            return this;
-        }
-
-        /**
-         * @since 3.0
-         */
-        public CommandMetadata.Builder valueRequired() {
-            return valueRequired("");
-        }
-
-        /**
-         * @since 3.0
-         */
-        public CommandMetadata.Builder valueRequired(String valueName) {
-            optionBuilder.valueRequired(valueName);
-            return this;
-        }
-
-        /**
-         * @since 3.0
-         */
-        public CommandMetadata.Builder valueOptional() {
-            optionBuilder.valueOptional();
-            return this;
-        }
-
-        /**
-         * @since 3.0
-         */
-        public CommandMetadata.Builder valueOptional(String valueName) {
-            optionBuilder.valueOptional(valueName);
-            return this;
-        }
-
-        /**
-         * Marks value optional and sets the default value for this command that will be used if the command is provided on
-         * command line without an explicit value.
-         *
-         * @param defaultValue a default value for the command.
-         * @return this builder instance
-         * @since 3.0
-         */
-        public CommandMetadata.Builder valueOptionalWithDefault(String defaultValue) {
-            optionBuilder.valueOptionalWithDefault(defaultValue);
-            return this;
-        }
-
-        /**
-         * Marks value optional and sets the default value for this command that will be used if the command is provided on
-         * command line without an explicit value.
-         *
-         * @param valueName    a description of value
-         * @param defaultValue a default value for the option.
-         * @return this builder instance
-         */
-        public CommandMetadata.Builder valueOptionalWithDefault(String valueName, String defaultValue) {
-            optionBuilder.valueOptionalWithDefault(valueName, defaultValue);
+            metadata.description = description;
             return this;
         }
 

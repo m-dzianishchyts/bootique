@@ -179,7 +179,7 @@ public class CommandDecoratorIT {
         DecoratorCommand c1 = DecoratorCommand.of();
         DecoratorCommand c2 = DecoratorCommand.of();
 
-        appManager.run(Bootique.app("--a")
+        appManager.run(Bootique.app("a")
                 .module(b -> BQCoreModule.extend(b)
                         .addCommand(mainCommand)
                         .decorateCommand(mainCommand.getClass(), CommandDecorator.beforeRun(c1))
@@ -354,7 +354,7 @@ public class CommandDecoratorIT {
 
         private CommandOutcome run() {
             Bootique app = Bootique
-                    .app("--a")
+                    .app("a")
                     .module(b -> BQCoreModule.extend(b)
                             .addCommand(mainCommand)
                             .addCommand(successfulCommand)
