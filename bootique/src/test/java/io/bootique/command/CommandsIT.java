@@ -26,7 +26,6 @@ import io.bootique.Bootique;
 import io.bootique.cli.Cli;
 import io.bootique.config.jackson.CliConfigurationLoader;
 import io.bootique.di.Binder;
-import io.bootique.BootiqueException;
 import io.bootique.di.DIRuntimeException;
 import io.bootique.help.HelpCommand;
 import io.bootique.meta.application.ApplicationMetadata;
@@ -164,11 +163,11 @@ public class CommandsIT {
     public void noModuleCommands_TryExec() {
         BQModule commandsModule = Commands.builder().noModuleCommands().module();
 
-        BQRuntime tryHelp = appManager.runtime(Bootique.app("help").module(commandsModule));
-        assertThrows(BootiqueException.class, tryHelp::run);
+        BQRuntime tryHelp = appManager.runtime(Bootique.app("--help").module(commandsModule));
+        assertThrows(DIRuntimeException.class, tryHelp::run);
 
-        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("help-config").module(commandsModule));
-        assertThrows(BootiqueException.class, tryHelpConfig::run);
+        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("--help-config").module(commandsModule));
+        assertThrows(DIRuntimeException.class, tryHelpConfig::run);
     }
 
     @Test
@@ -177,12 +176,12 @@ public class CommandsIT {
                 .add(HelpCommand.class)
                 .module();
 
-        BQRuntime tryHelp = appManager.runtime(Bootique.app("help").module(commandsModule));
+        BQRuntime tryHelp = appManager.runtime(Bootique.app("--help").module(commandsModule));
         CommandOutcome helpOutcome = tryHelp.run();
         assertTrue(helpOutcome.isSuccess());
 
-        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("help-config").module(commandsModule));
-        assertThrows(BootiqueException.class, tryHelpConfig::run);
+        BQRuntime tryHelpConfig = appManager.runtime(Bootique.app("--help-config").module(commandsModule));
+        assertThrows(DIRuntimeException.class, tryHelpConfig::run);
     }
 
     @Test

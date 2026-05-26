@@ -36,7 +36,7 @@ public class CommandDecorator_CommandsIT {
 
     private BQRuntime createRuntime(BQModule commandsOverride, CommandDecorator decorator) {
         return appManager.runtime(Bootique
-                .app("a")
+                .app("--a")
                 .module(b -> BQCoreModule.extend(b)
                         .addCommand(MainCommand.class)
                         .addCommand(SuccessfulCommand.class)

@@ -46,7 +46,11 @@ class PicocliParseResult {
 
     String getCommandName() {
         ParseResult subResult = rootResult.subcommand();
-        return subResult != null ? subResult.commandSpec().name() : null;
+        if (subResult == null) {
+            return null;
+        }
+        String name = subResult.commandSpec().name();
+        return name.startsWith("--") ? name.substring(2) : name;
     }
 
     boolean hasOption(String optionName) {

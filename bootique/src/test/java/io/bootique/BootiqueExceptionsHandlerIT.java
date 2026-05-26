@@ -47,16 +47,16 @@ public class BootiqueExceptionsHandlerIT {
 
     @Test
     public void cli_BadCommand() {
-        CommandOutcome out = Bootique.app("somecommand").exec();
+        CommandOutcome out = Bootique.app("--somecommand").exec();
 
         assertEquals(1, out.getExitCode());
         assertNull(out.getException());
-        assertEquals("Unknown command: 'somecommand'", out.getMessage());
+        assertEquals("Unknown option: '--somecommand'", out.getMessage());
     }
 
     @Test
     public void cli_TwoCommands() {
-        CommandOutcome out = Bootique.app("xcommand", "ycommand")
+        CommandOutcome out = Bootique.app("-x", "-y")
                 .module(b -> BQCoreModule.extend(b)
                         .addCommand(new Command() {
 
@@ -87,12 +87,12 @@ public class BootiqueExceptionsHandlerIT {
 
         assertEquals(1, out.getExitCode());
         assertNull(out.getException());
-        assertEquals("Unmatched argument at index 1: 'ycommand'", out.getMessage());
+        assertEquals("Unknown option: '-y'", out.getMessage());
     }
 
     @Test
     public void config_FileNotFound() {
-        CommandOutcome out = Bootique.app("-c", "com/foo/no_such_config.yml", "test")
+        CommandOutcome out = Bootique.app("-c", "com/foo/no_such_config.yml", "-t")
                 .module(b -> b.bind(ConfigDependent.class))
                 .module(b -> BQCoreModule.extend(b).addCommand(TestCommand.class))
                 .exec();
@@ -105,7 +105,7 @@ public class BootiqueExceptionsHandlerIT {
 
     @Test
     public void config_BadUrl() {
-        CommandOutcome out = Bootique.app("-c", "nosuchprotocol://myconfig", "test")
+        CommandOutcome out = Bootique.app("-c", "nosuchprotocol://myconfig", "-t")
                 .module(b -> b.bind(ConfigDependent.class))
                 .module(b -> BQCoreModule.extend(b).addCommand(TestCommand.class))
                 .exec();
@@ -118,7 +118,7 @@ public class BootiqueExceptionsHandlerIT {
     @Test
     public void config_BadUrlProtocol() {
         // underscores in protocol name cause IllegalArgumentException in URI
-        CommandOutcome out = Bootique.app("-c", "no_such_protocol://myconfig", "test")
+        CommandOutcome out = Bootique.app("-c", "no_such_protocol://myconfig", "-t")
                 .module(b -> b.bind(ConfigDependent.class))
                 .module(b -> BQCoreModule.extend(b).addCommand(TestCommand.class))
                 .exec();

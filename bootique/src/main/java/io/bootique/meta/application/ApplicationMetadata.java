@@ -91,20 +91,28 @@ public class ApplicationMetadata implements MetadataNode {
         }
 
         public ApplicationMetadata build() {
-            throwOnConflictingGlobalOptions();
+            throwOnConflictingGlobalFullNames();
             rewriteConflictingGlobalShortNames();
 
             application.options.sort(Comparator.comparing(OptionMetadata::getName));
             application.commands.sort(Comparator.comparing(CommandMetadata::getName));
-            application.variables.sort(Comparator.comparing(ConfigValueMetadata::getName));
             return application;
         }
 
-        private void throwOnConflictingGlobalOptions() {
-            Set<String> seen = new HashSet<>();
-            application.options.forEach(om -> {
-                if (!seen.add(om.getName())) {
-                    throw new BootiqueException(1, "Duplicate option name declaration: '" + om.getName() + "'");
+        private void throwOnConflictingGlobalFullNames() {
+            Map<String, String> seen = new HashMap<>();
+            application.commands.forEach(command -> {
+                String duplicateType = seen.put(command.getName(), "a command");
+                if(duplicateType != null) {
+                    throw new BootiqueException(1, "Duplicate CLI name '%s': already registered as %s"
+                            .formatted(command.getName(), duplicateType));
+                }
+            });
+            application.options.forEach(option -> {
+                String duplicateType = seen.put(option.getName(), "an option");
+                if (duplicateType != null) {
+                    throw new BootiqueException(1, "Duplicate CLI name '%s': already registered as %s"
+                            .formatted(option.getName(), duplicateType));
                 }
             });
         }

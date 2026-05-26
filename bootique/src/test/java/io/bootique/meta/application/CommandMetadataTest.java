@@ -35,6 +35,12 @@ public class CommandMetadataTest {
     }
 
     @Test
+    public void getShortName() {
+        CommandMetadata md = CommandMetadata.builder(MyCommand.class).shortName('M').build();
+        assertEquals("M", md.getCommandOption().getShortName());
+    }
+
+    @Test
     public void getName_CamelCase() {
         CommandMetadata md = CommandMetadata.builder(MyCamelCaseCommand.class).build();
         assertEquals("my-camel-case", md.getName());

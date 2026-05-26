@@ -40,6 +40,8 @@ public class HelpConfigCommand extends CommandWithMetadata {
                 .builder(HelpConfigCommand.class)
                 .description("Prints information about application modules and their configuration options. "
                         + "Optionally, you can provide a 'prefix' argument to print only the specified config.")
+                .valueOptional("prefix")
+                .shortName('H')
                 .build());
 
         this.bootLogger = bootLogger;
@@ -50,7 +52,7 @@ public class HelpConfigCommand extends CommandWithMetadata {
     public CommandOutcome run(Cli cli) {
         List<String> arguments = cli.optionStrings(getMetadata().getName());
 
-        Predicate<MetadataNode> predicate = (arguments.size() == 0)
+        Predicate<MetadataNode> predicate = arguments.isEmpty()
                 ? o -> true
                 : o -> arguments.contains(o.getName());
 

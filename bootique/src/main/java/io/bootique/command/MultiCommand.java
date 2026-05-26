@@ -144,7 +144,7 @@ class MultiCommand extends CommandWithMetadata {
             Command command = cmdRef.resolve(commandManager);
             String[] args = cmdRef.getArgs();
             if (args.length > 0) {
-                args = prepend(command.getMetadata().getName(), args);
+                args = prepend("--" + command.getMetadata().getName(), args);
             }
             Cli cli = getCliFactory().createCli(args);
             outcome = command.run(cli);

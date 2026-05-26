@@ -190,6 +190,7 @@ public class DefaultHelpGeneratorTest {
         CommandMetadata resetOpt = CommandMetadata.builder("reset").description("Resets everything").build();
         CommandMetadata runOpt = CommandMetadata.builder("reset-for-real")
                 .description("Resets everything and then does it again")
+                .shortName('R')
                 .build();
         ApplicationMetadata app = ApplicationMetadata
                 .builder("myapp")
@@ -202,10 +203,10 @@ public class DefaultHelpGeneratorTest {
                 "      myapp",
                 "",
                 "COMMANDS",
-                "      reset",
+                "      -r, --reset",
                 "           Resets everything",
                 "",
-                "      reset-for-real",
+                "      -R, --reset-for-real",
                 "           Resets everything and then does it again"
         );
     }

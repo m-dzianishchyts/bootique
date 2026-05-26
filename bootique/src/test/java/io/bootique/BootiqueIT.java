@@ -47,13 +47,13 @@ public class BootiqueIT {
 
     @Test
     public void exec() {
-        CommandOutcome outcome = Bootique.app().exec();
+        CommandOutcome outcome = Bootique.app(args).exec();
         assertTrue(outcome.isSuccess());
     }
 
     @Test
     public void exec_Failure() {
-        CommandOutcome outcome = Bootique.app("acommand").module(b ->
+        CommandOutcome outcome = Bootique.app("-a").module(b ->
                 BQCoreModule.extend(b).addCommand(new Command() {
                     @Override
                     public CommandOutcome run(Cli cli) {
@@ -74,7 +74,7 @@ public class BootiqueIT {
 
     @Test
     public void exec_Exception() {
-        CommandOutcome outcome = Bootique.app("acommand").module(b ->
+        CommandOutcome outcome = Bootique.app("-a").module(b ->
                 BQCoreModule.extend(b).addCommand(new Command() {
                     @Override
                     public CommandOutcome run(Cli cli) {

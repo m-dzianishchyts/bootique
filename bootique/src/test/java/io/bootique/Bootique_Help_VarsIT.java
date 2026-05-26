@@ -48,7 +48,7 @@ public class Bootique_Help_VarsIT {
         BQModule m = b -> {
         };
 
-        appManager.run(Bootique.app("help")
+        appManager.run(Bootique.app("--help")
                 .crate(ModuleCrate.of(m).config("x", O2.class).build())
                 .bootLogger(logger)
                 .module(b -> BQCoreModule.extend(b)
@@ -70,7 +70,7 @@ public class Bootique_Help_VarsIT {
         BQModule m = b -> {
         };
 
-        CommandOutcome run = appManager.run(Bootique.app("help")
+        CommandOutcome run = appManager.run(Bootique.app("--help")
                 .bootLogger(logger)
                 .crate(ModuleCrate.of(m).config("x", O4.class).build())
                 .module(b -> BQCoreModule.extend(b)
@@ -94,7 +94,7 @@ public class Bootique_Help_VarsIT {
         BQModule m = b -> {
         };
 
-        CommandOutcome run = appManager.run(Bootique.app("help")
+        CommandOutcome run = appManager.run(Bootique.app("--help")
                 .bootLogger(logger)
                 .crate(ModuleCrate.of(m).config("x", O4.class).build())
                 .module(b -> BQCoreModule.extend(b)
@@ -119,7 +119,7 @@ public class Bootique_Help_VarsIT {
         BQModule m = b -> {
         };
 
-        CommandOutcome run = appManager.run(Bootique.app("help")
+        CommandOutcome run = appManager.run(Bootique.app("--help")
                 .bootLogger(logger)
                 .crate(ModuleCrate.of(m).config("x", O4.class).build())
                 .module(b -> BQCoreModule.extend(b)
@@ -145,7 +145,7 @@ public class Bootique_Help_VarsIT {
         BQModule m = b -> {
         };
 
-        CommandOutcome run = appManager.run(Bootique.app("help")
+        CommandOutcome run = appManager.run(Bootique.app("--help")
                 .crate(ModuleCrate.of(m).config("x", O2.class).build())
                 .bootLogger(logger)
                 .module(b -> BQCoreModule.extend(b).declareVar("x.m", "s", "New description")));
@@ -167,7 +167,7 @@ public class Bootique_Help_VarsIT {
         BQModule m = b -> {
         };
 
-        CommandOutcome run = appManager.run(Bootique.app("help")
+        CommandOutcome run = appManager.run(Bootique.app("--help")
                 .bootLogger(logger)
                 .crate(ModuleCrate.of(m).config("x", O1.class).build())
                 .module(b -> BQCoreModule.extend(b)
@@ -190,7 +190,7 @@ public class Bootique_Help_VarsIT {
         BQModule m = b -> {
         };
 
-        CommandOutcome run = appManager.run(Bootique.app("help")
+        CommandOutcome run = appManager.run(Bootique.app("--help")
                 .crate(ModuleCrate.of(m).config("x", O3.class).build())
                 .bootLogger(logger)
                 .module(b -> BQCoreModule.extend(b)
@@ -211,7 +211,7 @@ public class Bootique_Help_VarsIT {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BootLogger logger = new DefaultBootLogger(true, new PrintStream(out), new PrintStream(System.err));
 
-        CommandOutcome run = appManager.run(Bootique.app("help")
+        CommandOutcome run = appManager.run(Bootique.app("--help")
                 .bootLogger(logger)
                 .module(b -> BQCoreModule.extend(b).declareVar("noSuchProperty.p1", "X_UNBOUND_VAR", "UVD")));
 

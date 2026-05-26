@@ -55,7 +55,13 @@ public class Bootique_CliOptionsIT {
 
     @Test
     public void helpCommand() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("help"));
+        BQRuntime runtime = appManager.runtime(Bootique.app("--help"));
+        assertTrue(runtime.run().isSuccess());
+    }
+
+    @Test
+    public void helpCommand_Short() {
+        BQRuntime runtime = appManager.runtime(Bootique.app("-h"));
         assertTrue(runtime.run().isSuccess());
     }
 
@@ -97,7 +103,7 @@ public class Bootique_CliOptionsIT {
 
     @Test
     public void sharedCommandSubOption_FirstCommand() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("cmd1", "--foo")
+        BQRuntime runtime = appManager.runtime(Bootique.app("--cmd1", "--foo")
                 .module(b -> BQCoreModule.extend(b)
                         .addCommand(new CommandWithSharedOpt("cmd1", "foo"))
                         .addCommand(new CommandWithSharedOpt("cmd2", "foo"))));
@@ -108,7 +114,7 @@ public class Bootique_CliOptionsIT {
 
     @Test
     public void sharedCommandSubOption_SecondCommand() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("cmd2", "--foo")
+        BQRuntime runtime = appManager.runtime(Bootique.app("--cmd2", "--foo")
                 .module(b -> BQCoreModule.extend(b)
                         .addCommand(new CommandWithSharedOpt("cmd1", "foo"))
                         .addCommand(new CommandWithSharedOpt("cmd2", "foo"))));
@@ -140,45 +146,60 @@ public class Bootique_CliOptionsIT {
 
     @Test
     public void commandWithOptionNameOverlap() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("xd")
+        BQRuntime runtime = appManager.runtime(Bootique.app("-x")
                 .module(b -> BQCoreModule.extend(b)
                         .addCommand(new NamedCommand("xd"))
                         .addOption(OptionMetadata.builder("xd").build())
                 ));
 
-        assertTrue(runtime.run().isSuccess());
+        assertThrows(DIRuntimeException.class, runtime::run);
     }
 
     @Test
     public void command_IllegalShort() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("x")
+        BQRuntime runtime = appManager.runtime(Bootique.app("-x")
                 .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class)));
-        assertThrows(BootiqueException.class, runtime::run);
+        assertThrows(DIRuntimeException.class, runtime::run);
+    }
+
+    @Test
+    public void command_ExplicitShort() {
+        BQRuntime runtime = appManager.runtime(Bootique.app("-A")
+                .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class)));
+        assertDoesNotThrow(runtime::run);
     }
 
     @Test
     public void overlappingCommands_IllegalShort() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("x")
+        BQRuntime runtime = appManager.runtime(Bootique.app("--x")
                 .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class).addCommand(XbCommand.class)));
-        assertThrows(BootiqueException.class, runtime::run);
+        assertThrows(DIRuntimeException.class, runtime::run);
     }
 
     @Test
     public void illegalAbbreviation() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("xc")
+        BQRuntime runtime = appManager.runtime(Bootique.app("--xc")
                 .module(b -> BQCoreModule.extend(b).addCommand(XccCommand.class)));
-        assertThrows(BootiqueException.class, runtime::run);
+        assertThrows(DIRuntimeException.class, runtime::run);
+    }
+
+    @Test
+    public void overlappingCommands_Short() {
+        BQRuntime runtime = appManager.runtime(Bootique.app("-A")
+                .module(b -> BQCoreModule.extend(b).addCommand(XaCommand.class).addCommand(XbCommand.class)));
+
+        assertDoesNotThrow(runtime::run);
     }
 
     @Test
     public void defaultCommandOptions() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("-l", "x", "--long=y")
+        BQRuntime runtime = appManager.runtime(Bootique.app("-l", "x", "--long=y", "--s")
                 .module(b -> BQCoreModule.extend(b).setDefaultCommand(TestCommand.class)));
 
 
         Cli cli = runtime.getInstance(Cli.class);
 
-        assertFalse(cli.hasOption("s"));
+        assertTrue(cli.hasOption("s"));
         assertEquals("x_y", String.join("_", cli.optionStrings("long")));
     }
 
@@ -219,7 +240,7 @@ public class Bootique_CliOptionsIT {
                         .mapConfigPath("opt-1", "c.m.k")
                         .addCommand(new TestOptionCommand1())));
 
-        assertThrows(DIRuntimeException.class, runtime::run);
+        assertDoesNotThrow(runtime::run);
     }
 
     @Test
@@ -318,7 +339,7 @@ public class Bootique_CliOptionsIT {
 
     @Test
     public void commandWithOptionWithDefaultValue() {
-        BQRuntime runtime = appManager.runtime(Bootique.app("cmd", "--option")
+        BQRuntime runtime = appManager.runtime(Bootique.app("--cmd", "--option")
                 .module(b -> BQCoreModule.extend(b).addCommand(CommandWithDefaultOptionValue.class)));
 
         Cli cli = runtime.getInstance(Cli.class);
@@ -375,7 +396,7 @@ public class Bootique_CliOptionsIT {
     static final class XaCommand extends CommandWithMetadata {
 
         public XaCommand() {
-            super(CommandMetadata.builder(XaCommand.class).build());
+            super(CommandMetadata.builder(XaCommand.class).shortName('A').build());
         }
 
         @Override
@@ -387,7 +408,7 @@ public class Bootique_CliOptionsIT {
     static final class XbCommand extends CommandWithMetadata {
 
         public XbCommand() {
-            super(CommandMetadata.builder(XbCommand.class).build());
+            super(CommandMetadata.builder(XbCommand.class).shortName('B').build());
         }
 
         @Override
@@ -399,7 +420,7 @@ public class Bootique_CliOptionsIT {
     static final class XccCommand extends CommandWithMetadata {
 
         public XccCommand() {
-            super(CommandMetadata.builder(XccCommand.class).build());
+            super(CommandMetadata.builder(XccCommand.class).shortName('B').build());
         }
 
         @Override

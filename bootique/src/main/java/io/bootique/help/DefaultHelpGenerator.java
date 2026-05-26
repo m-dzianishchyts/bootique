@@ -60,23 +60,6 @@ public class DefaultHelpGenerator implements HelpGenerator {
         printEnvironment(appender, application.getVariables());
     }
 
-    protected void printCommands(HelpAppender out, Collection<CommandMetadata> commands) {
-        if (commands.isEmpty()) {
-            return;
-        }
-
-        out.printSectionName("COMMANDS");
-
-        for (CommandMetadata cmd : commands) {
-            if (!cmd.isHidden()) {
-                out.printSubsectionHeader(cmd.getName());
-                if (cmd.getDescription() != null) {
-                    out.printDescription(cmd.getDescription());
-                }
-            }
-        }
-    }
-
     protected void printName(HelpAppender out, String name, String description) {
 
         out.printSectionName("NAME");
@@ -202,5 +185,24 @@ public class DefaultHelpGenerator implements HelpGenerator {
                 out.printDescription(description);
             }
         });
+    }
+
+    protected void printCommands(HelpAppender out, Collection<CommandMetadata> commands) {
+        if (commands.isEmpty()) {
+            return;
+        }
+
+        out.printSectionName("COMMANDS");
+
+        for (CommandMetadata cmd : commands) {
+            if (!cmd.isHidden()) {
+                String header = cmd.getShortName() != null ? ("-" + cmd.getShortName() + ", ") : "";
+                header += "--" + cmd.getName();
+                out.printSubsectionHeader(header);
+                if (cmd.getDescription() != null) {
+                    out.printDescription(cmd.getDescription());
+                }
+            }
+        }
     }
 }

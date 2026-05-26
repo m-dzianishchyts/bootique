@@ -28,10 +28,12 @@ import io.bootique.picocli.CommandLine.Model.PositionalParamSpec;
 import io.bootique.picocli.CommandLine.ParseResult;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Internal wrapper around picocli's CommandLine. Encapsulates picocli API.
@@ -62,9 +64,18 @@ class PicocliCommandLine {
         }
 
         // Add subcommands
+        Set<String> usedAliases = new HashSet<>();
         for (CommandMetadata cmd : application.getCommands()) {
             CommandSpec subSpec = CommandSpec.create();
-            subSpec.name(cmd.getName());
+            String cmdName = "--" + cmd.getName();
+            subSpec.name(cmdName);
+            String shortName = cmd.getShortName();
+            if (shortName != null) {
+                String alias = "-" + shortName;
+                if (usedAliases.add(alias)) {
+                    subSpec.aliases(alias);
+                }
+            }
             if (cmd.getDescription() != null) {
                 subSpec.usageMessage().description(cmd.getDescription());
             }
@@ -81,7 +92,7 @@ class PicocliCommandLine {
             }
             commandOptionsByName.put(cmd.getName(), cmdOptions);
 
-            rootSpec.addSubcommand(cmd.getName(), new CommandLine(subSpec));
+            rootSpec.addSubcommand(cmdName, new CommandLine(subSpec));
         }
 
         // Add positional parameter for remaining args
@@ -103,9 +114,7 @@ class PicocliCommandLine {
     private OptionSpec toOptionSpec(OptionMetadata option) {
         List<String> names = new LinkedList<>();
         names.add("--" + option.getName());
-        Optional.ofNullable(option.getShortName())
-                .filter(sn -> !sn.equals(option.getName()))
-                .ifPresent(sn -> names.add("-" + sn));
+        Optional.ofNullable(option.getShortName()).ifPresent(sn -> names.add("-" + sn));
 
         OptionSpec.Builder builder = OptionSpec.builder(names.toArray(String[]::new))
                 .description(option.getDescription() != null ? option.getDescription() : "");
